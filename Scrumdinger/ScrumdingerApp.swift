@@ -7,11 +7,12 @@
 
 import SwiftUI
 
-@main
+@main // by preceding the definition with @main, you inform the system that this is the only entry point to your app
 struct ScrumdingerApp: App {
+    @State private var scrums = DailyScrum.sampleData
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ScrumView(scrums: $scrums)
         }
     }
 }
