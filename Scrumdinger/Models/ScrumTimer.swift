@@ -6,7 +6,7 @@ import Foundation
 
 /// Keeps time for a daily scrum meeting. Keep track of the total meeting time, the time for each speaker, and the name of the current speaker.
 
-@MainActor
+@MainActor // guarantees that modification of the published properties happen on the main thread, making it safe to use the property with a @Binding
 final class ScrumTimer: ObservableObject {
     /// A struct to keep track of meeting attendees during a meeting.
     struct Speaker: Identifiable {

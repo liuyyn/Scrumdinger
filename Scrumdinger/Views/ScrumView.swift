@@ -9,7 +9,9 @@ import SwiftUI
 
 struct ScrumView: View {
     @Binding var scrums: [DailyScrum]
+    @Environment(\.scenePhase) private var scenePhase // observe this value and save user data when it becomes inactive
     @State private var isPresentingNewScrumView = false
+    let saveAction: () -> Void
     
     var body: some View {
         
@@ -35,11 +37,17 @@ struct ScrumView: View {
        .sheet(isPresented: $isPresentingNewScrumView) {
            NewScrumSheet(scrums: $scrums, isPresentingNewScrumView: $isPresentingNewScrumView)
        }
+        // use onChange to trigger actions when a specified value changes
+       .onChange(of: scenePhase) { phase in
+           // call saveAction() if the scene is moving to the inactive phase
+           // a scene in the inactive phase no longer receives events and may be unavailable to the user
+           if phase == .inactive { saveAction() }
+       }
     }
 }
 
 struct ScrumView_Previews: PreviewProvider {
     static var previews: some View {
-        ScrumView(scrums: .constant(DailyScrum.sampleData))
+        ScrumView(scrums: .constant(DailyScrum.sampleData), saveAction: {})
     }
 }

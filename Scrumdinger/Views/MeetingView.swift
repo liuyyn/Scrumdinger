@@ -14,6 +14,9 @@ struct MeetingView: View {
     // wrapping a property as a @StateObject means the view owns the source of truth for the object. @StateObject ties the ScrumTimer, which is an ObservableObject, to the MeetingView life cycle
     // wrapping a reference type property as a @StateObject keeps the object alive for the life cycle of a view
     @StateObject var scrumTimer = ScrumTimer()
+    @StateObject var speechRecognizer = SpeechRecognizer()
+    @State private var isRecording = false
+    
     private var player: AVPlayer { AVPlayer.sharedDingPlayer }
     
     var body: some View {
@@ -25,7 +28,7 @@ struct MeetingView: View {
                 
                 MeetingHeaderView(secondsElapsed: scrumTimer.secondsElapsed, secondsRemaining: scrumTimer.secondsRemaining, theme: scrum.theme)
                 
-                Circle().strokeBorder(lineWidth: 24)
+                MeetingTimerView(speakers: scrumTimer.speakers, isRecording: isRecording, theme: scrum.theme)
                 
                 MeetingFooterView(speakers: scrumTimer.speakers, skipAction: scrumTimer.skipSpeaker)
             }
@@ -49,12 +52,18 @@ struct MeetingView: View {
             player.seek(to: .zero) // seeking to time .zero ensures that the audio file always plays from the beginning
             player.play() // play the audio file
         }
+        
+        speechRecognizer.resetTranscript()
+        speechRecognizer.startTranscribing()
+        isRecording = true
         scrumTimer.startScrum() // start the meeting
     }
     
     private func endScrum() {
         scrumTimer.stopScrum()
-        let newHistory = History(attendees: scrum.attendees)
+        speechRecognizer.stopTranscribing()
+        isRecording =  false
+        let newHistory = History(attendees: scrum.attendees, transcript: speechRecognizer.transcript)
         scrum.history.insert(newHistory, at: 0)
     }
 }
